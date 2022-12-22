@@ -19,6 +19,7 @@ export default class Game extends Phaser.Scene {
         this.load.image('king', 'src/assets/King.jpg');
         this.load.image('yugi', 'src/assets/yugi.png');
         this.load.image('citizen', 'src/assets/citizen.jpg');
+        this.load.image('slave', 'src/assets/slave.jpg');
         this.load.image('yugi2', 'src/assets/yugi.png');
         this.load.image('fond2', 'src/assets/deal.png');
         this.load.image('pause', 'src/assets/Pause.png');
@@ -56,11 +57,12 @@ export default class Game extends Phaser.Scene {
         this.socket.on('dealCards', function () {
             self.dealer.dealCards();
             self.dealText.disableInteractive();
+            
         })
 
         this.socket.on('cardPlayed', function (gameObject, isPlayerA) {
             if (isPlayerA !== self.isPlayerA) {
-                let sprite = gameObject.textureKey;
+                let sprite = gameObject.opponentSprite;
                 self.opponentCards.shift().destroy();
                 self.dropZone.data.values.cards++;
                 let card = new Card(self);
@@ -82,6 +84,7 @@ export default class Game extends Phaser.Scene {
             self.dealText.setColor('#00ffff');
         })
 
+
         this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
             gameObject.y = dragY;
@@ -100,18 +103,19 @@ export default class Game extends Phaser.Scene {
             }
         })
 
+    
         this.input.on('drop', function (pointer, gameObject, dropZone) {
-            dropZone.data.values.cards++;
-            gameObject.x = (dropZone.x - 350) + (dropZone.data.values.cards * 50);
-            gameObject.y = dropZone.y;
-            gameObject.disableInteractive();
-            self.socket.emit('cardPlayed', gameObject, self.isPlayerA);
-        })
 
-        
+            gameObject.x = dropZone.x;
+            gameObject.y = dropZone.y;
+    
+            gameObject.input.enabled = false;
+    
+        });
     }
 
     update() {
+        
 
     }
 }
