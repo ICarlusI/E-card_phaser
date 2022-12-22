@@ -3,6 +3,11 @@ import Card from '../helpers/card';
 import Dealer from "../helpers/dealer";
 import Zone from '../helpers/zone';
 
+
+
+
+
+
 export default class Game extends Phaser.Scene {
     constructor() {
         super({
@@ -15,12 +20,18 @@ export default class Game extends Phaser.Scene {
         this.load.image('yugi', 'src/assets/yugi.png');
         this.load.image('citizen', 'src/assets/citizen.jpg');
         this.load.image('yugi2', 'src/assets/yugi.png');
-        this.load.image('fond', 'src/assets/deal.png');
+        this.load.image('fond2', 'src/assets/deal.png');
+        this.load.image('pause', 'src/assets/Pause.png');
+        this.load.image('cross', 'src/assets/Cross.png');
+
+
 
     }
 
     create() {
-        this.add.image(500, 400, 'fond');
+     
+
+        this.add.image(500, 400, 'fond2');
         this.isPlayerA = false;
         this.opponentCards = [];
 
@@ -96,6 +107,8 @@ export default class Game extends Phaser.Scene {
             gameObject.disableInteractive();
             self.socket.emit('cardPlayed', gameObject, self.isPlayerA);
         })
+
+        
     }
 
     update() {
