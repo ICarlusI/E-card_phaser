@@ -1,8 +1,9 @@
 import io from 'socket.io-client';
+import socket from 'socket.io-client/lib/socket';
 import Card from '../helpers/card';
 import Dealer from "../helpers/dealer";
 import Zone from '../helpers/zone';
-import Systeme from '../helpers/systeme';
+
 
 export default class Game extends Phaser.Scene {
     constructor() {
@@ -32,8 +33,6 @@ export default class Game extends Phaser.Scene {
 
         this.dealer = new Dealer(this);
 
-        this.Systeme = new Systeme(this);
-
         let self = this;
 
         this.socket = io('http://localhost:3000');
@@ -52,15 +51,9 @@ export default class Game extends Phaser.Scene {
             
         })
 
-        this.socket.on('Systeme', function () {
-            self.Systeme.calcul();
-            self.playText.disableInteractive();
-            
-        })
-
-        this.socket.on('cardPlayed', function (gameObject, isPlayerA) {
-            if (isPlayerA !== self.isPlayerA) {
-                let sprite = gameObject.opponentSprite;
+        this.socket.on('cardPlayed', function (data) {
+            if (data.playerId !== socket.id) {
+                let sprite = data.card.opponentSprite;
                 self.opponentCards.shift().destroy();
                 self.dropZone.data.values.cards++;
                 let card = new Card(self);
@@ -69,14 +62,10 @@ export default class Game extends Phaser.Scene {
         })
 
         this.dealText = this.add.text(75, 350, ['Start E-CARD']).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setInteractive();
-        this.playText = this.add.text(1100, 350, ['VALIDER']).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setInteractive();
+        
         
         this.dealText.on('pointerdown', function () {
             self.socket.emit("dealCards");
-        })
-
-        this.playText.on('pointerdown', function () {
-            self.socket.emit("Systeme");
         })
 
         this.dealText.on('pointerover', function () {
@@ -108,14 +97,20 @@ export default class Game extends Phaser.Scene {
 
     
         this.input.on('drop', function (pointer, gameObject, dropZone) {
+           
 
-            gameObject.x = dropZone.x;
+            gameObject.x = dropZone.x + (dropZone.data.values.cards);
             gameObject.y = dropZone.y;
+
+            if (gameObject.x > 2){
+                dropZone.input.enabled = false;
+
+            }
     
             gameObject.input.enabled = false;
-
-
-      
+           
+            gameObject.disableInteractive();
+            self.socket.emit('cardPlayed', gameObject, self.isPlayerA);
     
         });
     }
