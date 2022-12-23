@@ -2,11 +2,7 @@ import io from 'socket.io-client';
 import Card from '../helpers/card';
 import Dealer from "../helpers/dealer";
 import Zone from '../helpers/zone';
-
-
-
-
-
+import Systeme from '../helpers/systeme';
 
 export default class Game extends Phaser.Scene {
     constructor() {
@@ -22,16 +18,10 @@ export default class Game extends Phaser.Scene {
         this.load.image('slave', 'src/assets/slave.jpg');
         this.load.image('yugi2', 'src/assets/yugi.png');
         this.load.image('fond2', 'src/assets/deal.png');
-        this.load.image('pause', 'src/assets/Pause.png');
-        this.load.image('cross', 'src/assets/Cross.png');
-
-
 
     }
 
     create() {
-     
-
         this.add.image(500, 400, 'fond2');
         this.isPlayerA = false;
         this.opponentCards = [];
@@ -41,6 +31,8 @@ export default class Game extends Phaser.Scene {
         this.outline = this.zone.renderOutline(this.dropZone);
 
         this.dealer = new Dealer(this);
+
+        this.Systeme = new Systeme(this);
 
         let self = this;
 
@@ -60,6 +52,12 @@ export default class Game extends Phaser.Scene {
             
         })
 
+        this.socket.on('Systeme', function () {
+            self.Systeme.calcul();
+            self.playText.disableInteractive();
+            
+        })
+
         this.socket.on('cardPlayed', function (gameObject, isPlayerA) {
             if (isPlayerA !== self.isPlayerA) {
                 let sprite = gameObject.opponentSprite;
@@ -71,9 +69,14 @@ export default class Game extends Phaser.Scene {
         })
 
         this.dealText = this.add.text(75, 350, ['Start E-CARD']).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setInteractive();
-
+        this.playText = this.add.text(1100, 350, ['VALIDER']).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setInteractive();
+        
         this.dealText.on('pointerdown', function () {
             self.socket.emit("dealCards");
+        })
+
+        this.playText.on('pointerdown', function () {
+            self.socket.emit("Systeme");
         })
 
         this.dealText.on('pointerover', function () {
