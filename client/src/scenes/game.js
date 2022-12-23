@@ -114,6 +114,8 @@ export default class Game extends Phaser.Scene {
     
             gameObject.input.enabled = false;
 
+
+      
     
         });
     }
