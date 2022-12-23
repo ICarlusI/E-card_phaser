@@ -60,7 +60,7 @@ export default class Game extends Phaser.Scene {
 
         this.socket.on('cardPlayed', function (gameObject, isPlayerA) {
             if (isPlayerA !== self.isPlayerA) {
-                let sprite = gameObject.opponentSprite;
+                let sprite = gameObject.textureKey;
                 self.opponentCards.shift().destroy();
                 self.dropZone.data.values.cards++;
                 let card = new Card(self);
@@ -108,9 +108,10 @@ export default class Game extends Phaser.Scene {
 
     
         this.input.on('drop', function (pointer, gameObject, dropZone) {
+            dropZone.data.values.cards++;
            
 
-            gameObject.x = dropZone.x + (dropZone.data.values.cards );
+            gameObject.x = dropZone.x + (dropZone.data.values.cards * 50);
             gameObject.y = dropZone.y;
 
             if (gameObject.x > 2){
