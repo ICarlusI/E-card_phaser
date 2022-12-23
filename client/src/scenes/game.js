@@ -105,11 +105,20 @@ export default class Game extends Phaser.Scene {
 
     
         this.input.on('drop', function (pointer, gameObject, dropZone) {
+           
 
-            gameObject.x = dropZone.x;
+            gameObject.x = dropZone.x + (dropZone.data.values.cards );
             gameObject.y = dropZone.y;
+
+            if (gameObject.x > 2){
+                dropZone.input.enabled = false;
+
+            }
     
             gameObject.input.enabled = false;
+           
+            gameObject.disableInteractive();
+            self.socket.emit('cardPlayed', gameObject, self.isPlayerA);
     
         });
     }
