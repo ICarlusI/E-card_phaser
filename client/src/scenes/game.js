@@ -53,7 +53,7 @@ export default class Game extends Phaser.Scene {
 
         this.socket.on('cardPlayed', function (data) {
             if (data.playerId !== socket.id) {
-                let sprite = data.card.opponentSprite;
+                let sprite = data.card.textureKey = 'yugi';
                 self.opponentCards.shift().destroy();
                 self.dropZone.data.values.cards++;
                 let card = new Card(self);
