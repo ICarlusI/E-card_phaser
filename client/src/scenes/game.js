@@ -26,6 +26,7 @@ export default class Game extends Phaser.Scene {
         this.add.image(500, 400, 'fond2');
         this.isPlayerA = false;
         this.opponentCards = [];
+        this.round = 1;
 
         this.zone = new Zone(this);
         this.dropZone = this.zone.renderZone();
@@ -51,15 +52,35 @@ export default class Game extends Phaser.Scene {
             
         })
 
-        this.socket.on('cardPlayed', function (data) {
+
+        this.socket.on('roundEnd', function () {
+            self.opponentCards = [];  
+            self.dropZone.data.values.cards = 0;  
+            self.dealer.dealCards(); 
+            self.dealText.setInteractive();  
+            self.resultText.destroy();  
+          });
+
+       
+
+          this.socket.on('cardPlayed', function (data) {
             if (data.playerId !== socket.id) {
-                let sprite = data.card.textureKey = 'yugi';
-                self.opponentCards.shift().destroy();
-                self.dropZone.data.values.cards++;
-                let card = new Card(self);
-                card.render(((self.dropZone.x - 350) + (self.dropZone.data.values.cards * 50)), (self.dropZone.y), sprite).disableInteractive();
+              let result = data.result; 
+              if (result) {  
+                self.resultText = self.add.text(75, 250, [result]).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff'); 
+                self.socket.emit('roundEnd');  
+                return;  
+              }
+              let sprite = data.card.textureKey = 'yugi';
+              self.opponentCards.shift().destroy();
+              self.dropZone.data.values.cards++;
+              let card = new Card(self);
+              card.render(((self.dropZone.x - 350) + (self.dropZone.data.values.cards * 50)), (self.dropZone.y), sprite).disableInteractive();
             }
-        })
+          });
+          
+
+          
 
         this.dealText = this.add.text(75, 350, ['Start E-CARD']).setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setInteractive();
         
